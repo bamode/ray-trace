@@ -5,6 +5,11 @@ use crate::vec::Vec3;
 use crate::ray::Ray;
 
 pub type Point = Vec3;
+
+impl Point {
+    pub const ORIGIN: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
+}
+
 pub type Color = Vec3;
 
 pub fn write_color(file: &mut File, color: Color) -> Result<()> {
