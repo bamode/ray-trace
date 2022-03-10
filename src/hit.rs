@@ -14,6 +14,10 @@ impl HitRecord {
     pub fn new(p: Point, normal: Vec3, t: f64) -> Self {
         HitRecord { p, normal, t }
     }
+
+    pub const fn empty() -> Self {
+        Self { p: Point::ORIGIN, normal: Vec3::X_HAT, t: 0.0 }
+    }
 }
 
 pub trait Hit {
@@ -37,7 +41,7 @@ pub type HitList = Vec<Hittable>;
 
 impl Hit for HitList {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
-        let mut temp_rec = HitRecord::new(Point::ORIGIN, Vec3::X_HAT, 0.0);
+        let mut temp_rec = HitRecord::empty();
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
 

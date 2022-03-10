@@ -1,8 +1,16 @@
 use std::fs::File;
 use std::io::{Result, Write};
 
+use crate::hit::{Hit, HitList, HitRecord};
 use crate::vec::Vec3;
 use crate::ray::Ray;
+
+const PI: f64 = 3.141592653589793285;
+
+#[inline]
+pub fn degrees_to_radians(degrees: f64) -> f64 {
+    degrees *  PI / 180.0
+}
 
 pub type Point = Vec3;
 
@@ -21,16 +29,14 @@ pub fn write_color(file: &mut File, color: Color) -> Result<()> {
     Ok(())
 }
 
-pub fn ray_color(ray: &Ray) -> Color {
-    let t = hit_sphere(Point::new(0.0, 0.0, -1.0), 0.5, ray);
-    if t > 0.0 {
-        let n = (ray.at(t) - Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        return Color::new(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5
+pub fn ray_color(ray: &Ray, world: &HitList) -> Color {
+    let mut rec = HitRecord::empty();
+    if world.hit(ray, 0.0, f64::INFINITY, &mut rec) {
+        return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5
     }
-    
     let unit_dir = ray.dir.unit_vector();
-    let t: f64 = 0.5 * (unit_dir.y + 1.0);
-    Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t 
+    let t = (unit_dir.y + 1.0) * 0.5;
+    Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }
 
 #[inline]
