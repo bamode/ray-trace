@@ -5,11 +5,26 @@ use crate::hit::{Hit, HitList, HitRecord};
 use crate::vec::Vec3;
 use crate::ray::Ray;
 
+use rand::random;
+
 const PI: f64 = 3.141592653589793285;
 
 #[inline]
 pub fn degrees_to_radians(degrees: f64) -> f64 {
     degrees *  PI / 180.0
+}
+
+#[inline]
+pub fn random_f64(min: f64, max: f64) -> f64 {
+    min + (max - min) * random::<f64>()
+}
+
+#[inline]
+pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
+    if x < min { return min }
+    else if x > max { return max }
+
+    x
 }
 
 pub type Point = Vec3;
@@ -20,10 +35,14 @@ impl Point {
 
 pub type Color = Vec3;
 
-pub fn write_color(file: &mut File, color: Color) -> Result<()> {
-    let ir = (color.x * 256.999).round() as u8;
-    let ig = (color.y * 256.999).round() as u8;
-    let ib = (color.z * 256.999).round() as u8;
+pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> Result<()> {
+    let mut color = color;
+    let scale = 1.0 / samples_per_pixel as f64;
+    color *= scale;
+
+    let ir = (256.0 * clamp(color.x, 0.0, 0.999)) as u8;
+    let ig = (256.0 * clamp(color.y, 0.0, 0.999)) as u8;
+    let ib = (256.0 * clamp(color.z, 0.0, 0.999)) as u8;
 
     file.write_all(format!("{} {} {}\n", ir, ig, ib).as_bytes())?;
     Ok(())

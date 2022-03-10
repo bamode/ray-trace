@@ -1,7 +1,16 @@
 use std::fmt;
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg};
 
-#[derive(Clone, Copy, Debug)]
+/// Ray tracers are concerned principally with calculating the geometry
+/// of vectors in a three-dimensional space. Thus, it makes since to 
+/// write a general purpose vector for R^3, and provide the usual 
+/// utility functions to do vector math.
+/// 
+/// Ultimately, our vector is designed to provide a nice interface to what
+/// ought be as fast as a three-tuple of `f64`. In addition to vector
+/// math that is implemented on the `Vec3` struct itself, we also provide
+/// implementations of all the usual operators. 
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -13,10 +22,12 @@ impl Vec3 {
         Self { x, y, z }
     }
 
+    #[inline]
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
+    #[inline]
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
@@ -112,7 +123,7 @@ impl DivAssign<f64> for Vec3 {
 
 impl fmt::Display for Vec3 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "{} {} {}", self.x, self.y, self.z)?;
+        writeln!(f, "[{} {} {}]", self.x, self.y, self.z)?;
         
         Ok(())
     }
