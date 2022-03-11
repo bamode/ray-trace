@@ -5,7 +5,7 @@ use crate::hit::{Hit, HitList, HitRecord};
 use crate::vec::Vec3;
 use crate::ray::Ray;
 
-use rand::random;
+use rand::prelude::*;
 
 const PI: f64 = 3.141592653589793285;
 
@@ -15,8 +15,8 @@ pub fn degrees_to_radians(degrees: f64) -> f64 {
 }
 
 #[inline]
-pub fn random_f64(min: f64, max: f64) -> f64 {
-    min + (max - min) * random::<f64>()
+pub fn random_f64(min: f64, max: f64, rng: &mut ThreadRng) -> f64 {
+    min + (max - min) * rng.gen::<f64>()
 }
 
 #[inline]
@@ -38,7 +38,9 @@ pub type Color = Vec3;
 pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> Result<()> {
     let mut color = color;
     let scale = 1.0 / samples_per_pixel as f64;
-    color *= scale;
+    color.x = (scale * color.x).sqrt();
+    color.y = (scale * color.y).sqrt();
+    color.z = (scale * color.z).sqrt();
 
     let ir = (256.0 * clamp(color.x, 0.0, 0.999)) as u8;
     let ig = (256.0 * clamp(color.y, 0.0, 0.999)) as u8;
@@ -48,27 +50,19 @@ pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> R
     Ok(())
 }
 
-pub fn ray_color(ray: &Ray, world: &HitList) -> Color {
+pub fn ray_color(ray: &Ray, world: &HitList, depth: isize, rng: &mut ThreadRng) -> Color {
     let mut rec = HitRecord::empty();
-    if world.hit(ray, 0.0, f64::INFINITY, &mut rec) {
-        return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5
+
+    if depth <= 0 { 
+        return Color::new(0.0, 0.0, 0.0) 
     }
+
+    if world.hit(ray, 0.001, f64::INFINITY, &mut rec) {
+        let target: Point = rec.p + rec.normal + Point::random_unit_vector(rng);
+        return ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1, rng) * 0.5
+    }
+
     let unit_dir = ray.dir.unit_vector();
     let t = (unit_dir.y + 1.0) * 0.5;
     Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
-}
-
-#[inline]
-pub fn hit_sphere(center: Point, radius: f64, ray: &Ray) -> f64 {
-    let oc = ray.origin - center;
-    let a = ray.dir.length_squared();
-    let b = 2.0 * oc.dot(&ray.dir);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
-    
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-b - discriminant.sqrt()) / (2.0 * a)
-    }
 }

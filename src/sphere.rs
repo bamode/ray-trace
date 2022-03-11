@@ -27,9 +27,9 @@ impl Hit for Sphere {
         let sqrtd = discriminant.sqrt();
 
         // Find the nearest root that lies in the acceptable range
-        let root = (-half_b - sqrtd) / a; // this is the quadratic formula
+        let mut root = (-half_b - sqrtd) / a; // this is the quadratic formula
         if root < t_min || t_max < root {
-            let root = (-half_b + sqrtd) / a;
+            root = (-half_b + sqrtd) / a;
             if root < t_min || t_max < root {
                 return false
             }
@@ -38,6 +38,7 @@ impl Hit for Sphere {
         let t = root;
         let p = ray.at(root);
         let normal = ((p - self.center) / self.r).unit_vector(); 
+        
         hit_record.p = p;
         hit_record.normal = normal;
         hit_record.t = t;

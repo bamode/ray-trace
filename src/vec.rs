@@ -1,6 +1,10 @@
 use std::fmt;
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg};
 
+use rand::prelude::*;
+
+use crate::render::random_f64;
+
 /// Ray tracers are concerned principally with calculating the geometry
 /// of vectors in a three-dimensional space. Thus, it makes since to 
 /// write a general purpose vector for R^3, and provide the usual 
@@ -47,6 +51,25 @@ impl Vec3 {
     #[inline]
     pub fn unit_vector(&self) -> Self { 
         *self / self.length()
+    }
+
+    pub fn random(min: f64, max: f64, rng: &mut ThreadRng) -> Self {
+        let r1 = random_f64(min, max, rng);
+        let r2 = random_f64(min, max, rng);
+        let r3 = random_f64(min, max, rng);
+        Vec3::new(r1, r2, r3)
+    }
+
+    pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Self {
+        loop {
+            let p = Self::random(-1.0, 1.0, rng);
+            if p.length_squared() >= 1.0 { continue }
+            return p
+        }
+    }
+
+    pub fn random_unit_vector(rng: &mut ThreadRng) -> Self {
+        Self::random_in_unit_sphere(rng).unit_vector()
     }
 
     pub const X_HAT: Self = Self { x: 1.0, y: 0.0, z: 0.0 };
