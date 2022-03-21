@@ -14,7 +14,7 @@ use crate::render::random_f64;
 /// ought be as fast as a three-tuple of `f64`. In addition to vector
 /// math that is implemented on the `Vec3` struct itself, we also provide
 /// implementations of all the usual operators. 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -35,6 +35,12 @@ impl Vec3 {
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
+
+    #[inline]
+    pub fn near_zero(&self) -> bool {
+        const S: f64 = 1.0e-8;
+        self.x.abs() < S && self.y.abs() < S && self.z.abs() < S
+    }
     
     #[inline]
     pub fn cross(&self, other: &Self) -> Self {
@@ -51,6 +57,19 @@ impl Vec3 {
     #[inline]
     pub fn unit_vector(&self) -> Self { 
         *self / self.length()
+    }
+
+    #[inline]
+    pub fn reflect(&self, n: Vec3) -> Self {
+        *self - n * 2.0 * self.dot(&n)
+    }
+
+    #[inline]
+    pub fn refract(&self, n: Vec3, etai_over_etat: f64) -> Self {
+        let cos_theta = -self.dot(&n).min(1.0);
+        let r_out_perp: Vec3 = (*self + n * cos_theta) * etai_over_etat;
+        let r_out_parallel: Vec3 = n * -1.0 * (1.0 - r_out_perp.length_squared()).abs().sqrt();
+        r_out_perp + r_out_parallel
     }
 
     pub fn random(min: f64, max: f64, rng: &mut ThreadRng) -> Self {
@@ -118,6 +137,13 @@ impl Mul<f64> for Vec3 {
     type Output = Self;
     fn mul(self, rhs: f64) -> Self {
         Vec3::new(self.x * rhs, self.y * rhs, self.z * rhs)
+    }
+}
+
+impl Mul for Vec3 {
+    type Output = Self;
+    fn mul(self, other: Self) -> Self {
+        Vec3::new(self.x * other.x, self.y * other.y, self.z * other.z)
     }
 }
 

@@ -3,6 +3,7 @@ use std::io::{Result, Write};
 
 mod camera;
 mod hit;
+mod material;
 mod ray;
 mod render;
 mod sphere;
@@ -10,10 +11,9 @@ mod vec;
 
 use crate::camera::Camera;
 use crate::hit::{HitList, Hittable};
-use crate::ray::Ray;
+use crate::material::{Dielectric, Lambertian, Metal, MatKind};
 use crate::render::{Color, Point, write_color, ray_color};
 use crate::sphere::Sphere;
-use crate::vec::Vec3;
 
 use progress::Bar;
 use rand::prelude::*;
@@ -24,13 +24,21 @@ fn main() -> Result<()> {
     const IMAGE_WIDTH: usize = 1900;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
     const SAMPLES_PER_PIXEL: usize = 100;
-    const MAX_DEPTH: isize = 100;
+    const MAX_DEPTH: isize = 32;
 
     // World
-    let mut world = HitList::new();
-    world.push(Hittable::Sphere(Sphere::new(Point::new(0.0, 0.0, -1.0), 0.5)));
-    world.push(Hittable::Sphere(Sphere::new(Point::new(-1.0, 0.0, -1.0), 0.6))); 
-    world.push(Hittable::Sphere(Sphere::new(Point::new(0.0, -100.5, -1.0), 100.0)));
+    let mut world: HitList<MatKind> = HitList::new();
+
+    let ground = MatKind::Lambertian(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let center = MatKind::Lambertian(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
+    let left = MatKind::Dielectric(Dielectric::new(1.33));
+    let right = MatKind::Metal(Metal::new(Color::new(0.8, 0.6, 0.2)));
+
+    world.push(Hittable::Sphere(Sphere::new(Point::new(0.0, 0.0, -1.0), 0.5, center)));
+    world.push(Hittable::Sphere(Sphere::new(Point::new(0.0, -100.5, -1.0), 100.0, ground)));
+    world.push(Hittable::Sphere(Sphere::new(Point::new(-1.0, 0.0, -1.0), 0.5, left)));
+    world.push(Hittable::Sphere(Sphere::new(Point::new(-1.0, 0.0, -1.0), -0.49, left)));
+    world.push(Hittable::Sphere(Sphere::new(Point::new(1.0, 0.0, -1.0), 0.5, right)));
 
     // Camera
     let camera = Camera::new(); 

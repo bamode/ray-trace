@@ -1,22 +1,33 @@
 use crate::hit::{HitRecord, Hit};
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::render::Point;
 use crate::vec::Vec3;
 
 #[derive(Clone, Copy, Debug)]
-pub struct Sphere {
+pub struct Sphere<Mat> 
+where
+    Mat: Material + Copy + Default
+{
     pub center: Point,
     pub r: f64,
+    pub material: Mat
 }
 
-impl Sphere {
-    pub fn new(center: Point, r: f64) -> Self {
-        Sphere { center, r }
+impl<Mat> Sphere<Mat>
+where
+    Mat: Material + Copy + Default
+{
+    pub fn new(center: Point, r: f64, material: Mat) -> Self {
+        Sphere { center, r, material}
     }
 }
 
-impl Hit for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord) -> bool {
+impl<Mat> Hit<Mat> for Sphere<Mat>
+where
+    Mat: Material + Copy + Default
+{
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_record: &mut HitRecord<Mat>) -> bool {
         let oc: Vec3 = ray.origin - self.center;
         let a = ray.dir.length_squared();
         let half_b = oc.dot(&ray.dir);
@@ -36,13 +47,16 @@ impl Hit for Sphere {
         }
 
         let t = root;
-        let p = ray.at(root);
+        let p = ray.at(t);
         let normal = ((p - self.center) / self.r).unit_vector(); 
         
         hit_record.p = p;
         hit_record.normal = normal;
         hit_record.t = t;
 
+        let outward_normal: Vec3 = (hit_record.p - self.center) / self.r;
+        hit_record.set_face_normal(ray, &outward_normal);
+        hit_record.material = self.material;
         true
     }
 }

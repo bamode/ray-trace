@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 progress = "0.2"
 rand = "0.8.5"
+
+[profile.release]
+debug = true

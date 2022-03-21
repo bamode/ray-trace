@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{Result, Write};
 
 use crate::hit::{Hit, HitList, HitRecord};
+use crate::material::{Material, MatKind};
 use crate::vec::Vec3;
 use crate::ray::Ray;
 
@@ -50,19 +51,25 @@ pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> R
     Ok(())
 }
 
-pub fn ray_color(ray: &Ray, world: &HitList, depth: isize, rng: &mut ThreadRng) -> Color {
+pub fn ray_color(ray: &Ray, world: &HitList<MatKind>, depth: isize, rng: &mut ThreadRng) -> Color {
     let mut rec = HitRecord::empty();
 
     if depth <= 0 { 
+        //println!("[WARNING] depth limit reached");
         return Color::new(0.0, 0.0, 0.0) 
     }
 
-    if world.hit(ray, 0.001, f64::INFINITY, &mut rec) {
-        let target: Point = rec.p + rec.normal + Point::random_unit_vector(rng);
-        return ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1, rng) * 0.5
+    if world.hit(ray, 0.0001, f64::INFINITY, &mut rec) {
+        let mat = rec.material;
+        let scatter = mat.scatter(&ray, &mut rec, rng);
+        if scatter.is_scattered {
+            return ray_color(&scatter.scattered, world, depth - 1, rng) * scatter.attenuation
+        }
+        return Color::default()
     }
 
     let unit_dir = ray.dir.unit_vector();
     let t = (unit_dir.y + 1.0) * 0.5;
+    
     Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }
