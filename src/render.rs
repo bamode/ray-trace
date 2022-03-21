@@ -8,7 +8,7 @@ use crate::ray::Ray;
 
 use rand::prelude::*;
 
-const PI: f64 = 3.141592653589793285;
+pub const PI: f64 = 3.141592653589793285;
 
 #[inline]
 pub fn degrees_to_radians(degrees: f64) -> f64 {

@@ -92,8 +92,6 @@ impl Vec3 {
     }
 
     pub const X_HAT: Self = Self { x: 1.0, y: 0.0, z: 0.0 };
-    pub const Y_HAT: Self = Self { x: 0.0, y: 1.0, z: 0.0 };
-    pub const Z_HAT: Self = Self { x: 0.0, y: 0.0, z: 1.0 };
 }
 
 impl Neg for Vec3 {

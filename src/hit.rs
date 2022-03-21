@@ -1,4 +1,4 @@
-use crate::material::{Material, Lambertian};
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::render::Point;
 use crate::sphere::Sphere;
