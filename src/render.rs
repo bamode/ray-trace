@@ -59,7 +59,7 @@ pub fn ray_color(ray: &Ray, world: &HitList<MatKind>, depth: isize, rng: &mut Th
         return Color::new(0.0, 0.0, 0.0) 
     }
 
-    if world.hit(ray, 0.0001, f64::INFINITY, &mut rec) {
+    if world.hit(ray, 0.001, f64::INFINITY, &mut rec) {
         let mat = rec.material;
         let scatter = mat.scatter(&ray, &mut rec, rng);
         if scatter.is_scattered {
