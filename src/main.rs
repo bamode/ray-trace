@@ -26,7 +26,7 @@ fn main() -> Result<()> {
 
     // Image
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: usize = 400;
+    const IMAGE_WIDTH: usize = 1200;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
     const SAMPLES_PER_PIXEL: usize = 100;
     const MAX_DEPTH: isize = 32;
