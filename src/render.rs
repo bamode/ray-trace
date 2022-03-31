@@ -36,6 +36,7 @@ impl Point {
 
 pub type Color = Vec3;
 
+/*
 pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> Result<()> {
     let mut color = color;
     let scale = 1.0 / samples_per_pixel as f64;
@@ -48,6 +49,28 @@ pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> R
     let ib = (256.0 * clamp(color.z, 0.0, 0.999)) as u8;
 
     file.write_all(format!("{} {} {}\n", ir, ig, ib).as_bytes())?;
+    Ok(())
+}
+*/
+
+pub fn write_color_to_pixel_buffer(color: Color, samples_per_pixel: usize) -> (u8, u8, u8) {
+    let mut color = color;
+    let scale = 1.0 / samples_per_pixel as f64;
+    color.x = (scale * color.x).sqrt();
+    color.y = (scale * color.y).sqrt();
+    color.z = (scale * color.z).sqrt();
+
+    let ir = (256.0 * clamp(color.x, 0.0, 0.999)) as u8;
+    let ig = (256.0 * clamp(color.y, 0.0, 0.999)) as u8;
+    let ib = (256.0 * clamp(color.z, 0.0, 0.999)) as u8;
+
+    (ir, ig, ib)
+}
+
+pub fn write_buffer(file: &mut File, pixels: &[u8]) -> Result<()> {
+    for pix in pixels.chunks(3).rev() {
+        file.write_all(format!("{} {} {}\n", pix[0], pix[1], pix[2]).as_bytes())?;
+    }
     Ok(())
 }
 

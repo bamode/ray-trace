@@ -97,10 +97,12 @@ where
             if hit.hit(ray, t_min, closest_so_far, &mut temp_rec) {
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
-                //rec.p = temp_rec.p;
-                //rec.normal = temp_rec.normal;
-                //rec.t = temp_rec.t;
-                *rec = temp_rec;
+                rec.p = temp_rec.p;
+                rec.normal = temp_rec.normal;
+                rec.t = temp_rec.t;
+                rec.material = temp_rec.material;
+                rec.front_face = temp_rec.front_face;
+                //*rec = temp_rec;
             }
         }
 

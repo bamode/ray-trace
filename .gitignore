@@ -1,5 +1,5 @@
 /target
-perf.data
-perf.data.old
+perf*
 flamegraph.svg
 image.ppm
+callgrind*
