@@ -6,6 +6,8 @@ use crate::material::{Material, MatKind};
 use crate::vec::Vec3;
 use crate::ray::Ray;
 
+use image;
+use image::ImageResult;
 use rand::prelude::*;
 
 pub const PI: f64 = 3.141592653589793285;
@@ -36,7 +38,7 @@ impl Point {
 
 pub type Color = Vec3;
 
-pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> Result<()> {
+pub fn write_color_ppm(file: &mut File, color: Color, samples_per_pixel: usize) -> Result<()> {
     let mut color = color;
     let scale = 1.0 / samples_per_pixel as f64;
     color.x = (scale * color.x).sqrt();
@@ -48,6 +50,11 @@ pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> R
     let ib = (256.0 * clamp(color.z, 0.0, 0.999)) as u8;
 
     file.write_all(format!("{} {} {}\n", ir, ig, ib).as_bytes())?;
+    Ok(())
+}
+
+pub fn write_color_png(filename: &str, pixels: &[u8], samples: usize, width: usize, height: usize) -> ImageResult<()> {
+    image::save_buffer(filename, pixels, width as u32, height as u32, image::ColorType::Rgb8)?;
     Ok(())
 }
 

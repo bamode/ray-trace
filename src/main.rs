@@ -12,7 +12,7 @@ mod vec;
 use crate::camera::Camera;
 use crate::hit::{HitList, Hittable};
 use crate::material::{Dielectric, Lambertian, Metal, MatKind};
-use crate::render::{Color, Point, write_color, ray_color};
+use crate::render::{Color, Point, write_color_ppm, ray_color};
 use crate::sphere::Sphere;
 use crate::vec::Vec3;
 
@@ -63,7 +63,7 @@ fn main() -> Result<()> {
                 let ray = camera.get_ray(u, v);
                 pixel_color += ray_color(&ray, &world, MAX_DEPTH, &mut rng);
             }
-            write_color(&mut file, pixel_color, SAMPLES_PER_PIXEL)?;
+            write_color_ppm(&mut file, pixel_color, SAMPLES_PER_PIXEL)?;
 
             let prog: i32 = (((IMAGE_HEIGHT - j) * IMAGE_WIDTH + i) as f64 / (IMAGE_WIDTH as f64 * IMAGE_HEIGHT as f64) * 100.0) as i32;
             bar.reach_percent(prog);
