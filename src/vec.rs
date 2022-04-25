@@ -14,6 +14,13 @@ use crate::render::random_f64;
 /// ought be as fast as a three-tuple of `f64`. In addition to vector
 /// math that is implemented on the `Vec3` struct itself, we also provide
 /// implementations of all the usual operators. 
+/// 
+/// # Note
+/// 
+/// Something interesting in the book (p. 60) is this idea of being able to 
+/// treat a Vec3 as a list with `[]` access. I'm going to try to avoid this
+/// because it won't lead to particularly idiomatic Rust. Instead, I'll be trying
+/// to rewrite algorithms locally to go around this.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vec3 {
     pub x: f64,
@@ -57,6 +64,65 @@ impl Vec3 {
     #[inline]
     pub fn unit_vector(&self) -> Self { 
         *self / self.length()
+    }
+
+    #[allow(unused)]
+    #[inline]
+    pub fn coordinate_system_from(&self) -> (Vec3, Vec3, Vec3) {
+        let v1 = self.unit_vector();
+        let v2: Vec3;
+        let v3: Vec3;
+
+        if v1.x.abs() > v1.y.abs() {
+            let norm_len = (v1.x * v1.x + v1.z * v1.z).sqrt();
+            v2 = Vec3::new(-v1.z, 0., v1.x) / norm_len;
+        } else {
+            let norm_len = (v1.y * v1.y + v1.z * v1.z).sqrt();
+            v2 = Vec3::new(0., v1.z, -v1.y) / norm_len;
+        }
+
+        v3 = v1.cross(&v2);
+        
+        (v1, v2, v3)
+    }
+
+    #[allow(unused)]
+    #[inline]
+    pub fn min_component(&self) -> f64 {
+        self.x.min(self.y.min(self.z))
+    }
+
+    #[allow(unused)]
+    #[inline]
+    pub fn max_component(&self) -> f64 {
+        self.x.max(self.y.max(self.z))
+    }
+
+    #[allow(unused)]
+    #[inline]
+    pub fn min(&self, other: &Self) -> Self {
+        Self::new(self.x.min(other.x), self.y.min(other.y), self.z.min(other.z))
+    }
+
+    #[allow(unused)]
+    #[inline]
+    pub fn max(&self, other: &Self) -> Self {
+        Self::new(self.x.max(other.x), self.y.max(other.y), self.z.max(other.z))
+    }
+
+    /// Unimplemented because I want to avoid this sort of thing.
+    /// That said, it could be doable with pattern matching.
+    #[allow(unused)]
+    pub fn max_dimension(&self) -> usize {
+        unimplemented!()
+    }
+
+    /// Unimplemented because I don't quite understand what the idea is. I'm 
+    /// concerned that it's very unsafe, so I want to see it in action before
+    /// making it available as a tool.
+    #[allow(unused)]
+    pub fn permute(&self, x: usize, y: usize, z: usize) -> Self {
+        unimplemented!()
     }
 
     #[inline]

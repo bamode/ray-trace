@@ -4,8 +4,10 @@ use crate::ray::Ray;
 use crate::render::{degrees_to_radians, Point};
 use crate::vec::Vec3;
 
+use rayon::prelude::*;
+
 #[derive(Debug)]
-pub struct Camera<'rng> {
+pub struct Camera {
     origin: Point,
     ll_corner: Point,
     horizontal: Vec3,
@@ -13,10 +15,10 @@ pub struct Camera<'rng> {
     u: Vec3,
     v: Vec3,
     lens_radius: f64,
-    rng: &'rng mut ThreadRng,
+    rng: ThreadRng,
 }
 
-impl<'rng> Camera<'rng> {
+impl Camera {
     pub fn new(
         aspect_ratio: f64, 
         vfov: f64, 
@@ -24,8 +26,7 @@ impl<'rng> Camera<'rng> {
         lookat: Point, 
         vup: Vec3, 
         aperture: f64, 
-        focus_dist: f64,
-        rng: &'rng mut ThreadRng) -> Self 
+        focus_dist: f64) -> Self 
     {
         
         let theta = degrees_to_radians(vfov);
@@ -44,6 +45,8 @@ impl<'rng> Camera<'rng> {
 
         let lens_radius = aperture / 2.0;
 
+        let rng = thread_rng();
+
         Camera { 
             origin,
             horizontal,
@@ -57,7 +60,7 @@ impl<'rng> Camera<'rng> {
     }
 
     pub fn get_ray(&mut self, s: f64, t: f64) -> Ray {
-        let rd = Vec3::random_in_unit_disk(self.rng) * self.lens_radius;
+        let rd = Vec3::random_in_unit_disk(&mut self.rng) * self.lens_radius;
         let offset = self.u * rd.x + self.v * rd.y;
         Ray::new(
             self.origin + offset,

@@ -9,15 +9,16 @@ use crate::ray::Ray;
 use rand::prelude::*;
 
 pub const PI: f64 = 3.141592653589793285;
+pub const DEG_TO_RAD: f64 = PI / 180.0;
 
 #[inline]
 pub fn degrees_to_radians(degrees: f64) -> f64 {
-    degrees *  PI / 180.0
+    degrees *  DEG_TO_RAD
 }
 
 #[inline]
 pub fn random_f64(min: f64, max: f64, rng: &mut ThreadRng) -> f64 {
-    min + (max - min) * rng.gen::<f64>()
+    rng.gen_range(min..max)
 }
 
 #[inline]
@@ -35,23 +36,6 @@ impl Point {
 }
 
 pub type Color = Vec3;
-
-/*
-pub fn write_color(file: &mut File, color: Color, samples_per_pixel: usize) -> Result<()> {
-    let mut color = color;
-    let scale = 1.0 / samples_per_pixel as f64;
-    color.x = (scale * color.x).sqrt();
-    color.y = (scale * color.y).sqrt();
-    color.z = (scale * color.z).sqrt();
-
-    let ir = (256.0 * clamp(color.x, 0.0, 0.999)) as u8;
-    let ig = (256.0 * clamp(color.y, 0.0, 0.999)) as u8;
-    let ib = (256.0 * clamp(color.z, 0.0, 0.999)) as u8;
-
-    file.write_all(format!("{} {} {}\n", ir, ig, ib).as_bytes())?;
-    Ok(())
-}
-*/
 
 pub fn write_color_to_pixel_buffer(color: Color, samples_per_pixel: usize) -> (u8, u8, u8) {
     let mut color = color;
