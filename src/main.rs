@@ -7,14 +7,14 @@ mod material;
 mod ray;
 mod render;
 mod sphere;
-mod vec;
+mod math;
 
 use crate::camera::Camera;
 use crate::hit::{HitList, Hittable};
 use crate::material::{Dielectric, Lambertian, Metal, MatKind};
 use crate::render::{Color, Point, ray_color};
 use crate::sphere::Sphere;
-use crate::vec::Vec3;
+use crate::math::*;
 
 use clap::Parser;
 use indicatif::ParallelProgressIterator;
