@@ -3,8 +3,8 @@ use std::io::{Result, Write};
 
 use crate::hit::{Hit, HitList, HitRecord};
 use crate::material::{MatKind, Material};
-use crate::ray::Ray;
-use crate::vec::Vec3;
+use crate::math::ray::Ray;
+use crate::math::vec::Vec3;
 
 use rand::prelude::*;
 

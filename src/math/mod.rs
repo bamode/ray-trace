@@ -1,5 +1,6 @@
 pub mod normal;
 pub mod point;
+pub mod ray;
 pub mod vec;
 
 pub trait Dot<Rhs = Self> {

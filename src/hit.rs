@@ -1,5 +1,5 @@
 use crate::material::Material;
-use crate::ray::Ray;
+use crate::math::ray::Ray;
 use crate::render::Point;
 use crate::sphere::Sphere;
 use crate::vec::Vec3;

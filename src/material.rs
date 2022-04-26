@@ -1,7 +1,7 @@
 use rand::prelude::*;
 
 use crate::hit::HitRecord;
-use crate::ray::Ray;
+use crate::math::ray::Ray;
 use crate::render::Color;
 use crate::vec::Vec3;
 

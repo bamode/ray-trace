@@ -5,7 +5,6 @@ mod camera;
 mod hit;
 mod material;
 mod math;
-mod ray;
 mod render;
 mod sphere;
 

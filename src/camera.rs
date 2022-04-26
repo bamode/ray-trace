@@ -1,6 +1,6 @@
 use rand::prelude::*;
 
-use crate::ray::Ray;
+use crate::math::ray::Ray;
 use crate::render::{degrees_to_radians, Point};
 use crate::vec::Vec3;
 
