@@ -15,6 +15,7 @@ use crate::material::{Dielectric, Lambertian, Metal, MatKind};
 use crate::render::{Color, Point, ray_color};
 use crate::sphere::Sphere;
 use crate::math::*;
+use crate::math::vec::Vec3;
 
 use clap::Parser;
 use indicatif::ParallelProgressIterator;
