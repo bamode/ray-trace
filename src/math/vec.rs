@@ -39,23 +39,23 @@ impl Vec3 {
         Self { x, y, z }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn near_zero(&self) -> bool {
         const S: f64 = 1.0e-8;
         self.x.abs() < S && self.y.abs() < S && self.z.abs() < S
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn cross(&self, other: &Self) -> Self {
         Vec3::new(
             self.y * other.z - self.z * other.y,
@@ -64,18 +64,17 @@ impl Vec3 {
         )
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn dot(&self, other: &Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn unit_vector(&self) -> Self {
         *self / self.length()
     }
 
-    #[allow(unused)]
-    #[inline]
+    #[inline(always)]
     pub fn coordinate_system_from(&self) -> (Vec3, Vec3, Vec3) {
         let v1 = self.unit_vector();
 
@@ -92,20 +91,17 @@ impl Vec3 {
         (v1, v2, v3)
     }
 
-    #[allow(unused)]
-    #[inline]
+    #[inline(always)]
     pub fn min_component(&self) -> f64 {
         self.x.min(self.y.min(self.z))
     }
 
-    #[allow(unused)]
-    #[inline]
+    #[inline(always)]
     pub fn max_component(&self) -> f64 {
         self.x.max(self.y.max(self.z))
     }
 
-    #[allow(unused)]
-    #[inline]
+    #[inline(always)]
     pub fn min(&self, other: &Self) -> Self {
         Self::new(
             self.x.min(other.x),
@@ -114,8 +110,7 @@ impl Vec3 {
         )
     }
 
-    #[allow(unused)]
-    #[inline]
+    #[inline(always)]
     pub fn max(&self, other: &Self) -> Self {
         Self::new(
             self.x.max(other.x),

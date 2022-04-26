@@ -34,42 +34,42 @@ impl Point3 {
         Self { x, y, z }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn distance(self, p: Self) -> f64 {
         (self - p).length()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn distance_squared(self, p: Self) -> f64 {
         (self - p).length_squared()
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn linterp(t: f64, p1: Self, p2: Self) -> Self {
         (1.0 - t) * p1 + t * p2
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn min(self, p: Self) -> Self {
         Point3::new(self.x.min(p.x), self.y.min(p.y), self.z.min(p.z))
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn max(self, p: Self) -> Self {
         Point3::new(self.x.max(p.x), self.y.max(p.y), self.z.max(p.z))
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn floor(self) -> Self {
         Point3::new(self.x.floor(), self.y.floor(), self.z.floor())
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn ceil(self) -> Self {
         Point3::new(self.x.ceil(), self.y.ceil(), self.z.ceil())
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn abs(self) -> Self {
         Point3::new(self.x.abs(), self.y.abs(), self.z.abs())
     }
