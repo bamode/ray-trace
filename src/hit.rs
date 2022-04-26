@@ -59,7 +59,7 @@ where
 {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord<Mat>) -> bool {
         match self {
-            Self::Sphere(s) => return s.hit(ray, t_min, t_max, rec)
+            Self::Sphere(s) => s.hit(ray, t_min, t_max, rec)
         }
     }
 }

@@ -97,18 +97,17 @@ impl Material for Dielectric {
                rng: &mut ThreadRng) -> Scatter
     {
         let attenuation = Color::new(0.98, 0.98, 0.98);
-        let refraction_ratio: f64;
-        if hit_record.front_face.unwrap() { refraction_ratio = 1.0 / self.ir; }
-        else { refraction_ratio = self.ir; }
+        let refraction_ratio = 
+            if hit_record.front_face.unwrap() { 1.0 / self.ir }
+            else { self.ir };
 
         let unit_dir = r_in.dir.unit_vector();
         let cos_theta: f64 = -unit_dir.dot(&hit_record.normal).min(1.0);
         let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
-        let dir: Vec3;
-        if cannot_refract || Dielectric::reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>() { dir = unit_dir.reflect(hit_record.normal); }
-        else { dir = unit_dir.refract(hit_record.normal, refraction_ratio); }
+        let dir = if cannot_refract || Dielectric::reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>() { unit_dir.reflect(hit_record.normal) }
+            else { unit_dir.refract(hit_record.normal, refraction_ratio) };
 
         let scattered = Ray::new(hit_record.p, dir);
         let is_scattered = true;

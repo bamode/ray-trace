@@ -15,12 +15,18 @@ use crate::render::random_f64;
 /// math that is implemented on the `Vec3` struct itself, we also provide
 /// implementations of all the usual operators. 
 /// 
-/// # Note
+/// ### Note
 /// 
 /// Something interesting in the book (p. 60) is this idea of being able to 
 /// treat a Vec3 as a list with `[]` access. I'm going to try to avoid this
 /// because it won't lead to particularly idiomatic Rust. Instead, I'll be trying
 /// to rewrite algorithms locally to go around this.
+/// 
+/// ### Note
+/// 
+/// On the location of interoperation between these various 3-dimensional types:
+/// in general, I treat `Vec3` as a base, and so `Add` between a `Point3` and a 
+/// `Vec3` is defined in `point.rs` and not `vec.rs`.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vec3 {
     pub x: f64,
@@ -70,18 +76,16 @@ impl Vec3 {
     #[inline]
     pub fn coordinate_system_from(&self) -> (Vec3, Vec3, Vec3) {
         let v1 = self.unit_vector();
-        let v2: Vec3;
-        let v3: Vec3;
 
-        if v1.x.abs() > v1.y.abs() {
+        let v2 = if v1.x.abs() > v1.y.abs() {
             let norm_len = (v1.x * v1.x + v1.z * v1.z).sqrt();
-            v2 = Vec3::new(-v1.z, 0., v1.x) / norm_len;
+            Vec3::new(-v1.z, 0., v1.x) / norm_len
         } else {
             let norm_len = (v1.y * v1.y + v1.z * v1.z).sqrt();
-            v2 = Vec3::new(0., v1.z, -v1.y) / norm_len;
-        }
+            Vec3::new(0., v1.z, -v1.y) / norm_len
+        };
 
-        v3 = v1.cross(&v2);
+        let v3 = v1.cross(&v2);
         
         (v1, v2, v3)
     }

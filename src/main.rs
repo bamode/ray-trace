@@ -79,7 +79,7 @@ fn main() -> Result<()> {
 
 
     // Render 
-    let filename = cli.out.unwrap_or("image.ppm".to_string());
+    let filename = cli.out.unwrap_or_else(|| "image.ppm".to_string());
     let mut file = File::create(filename).unwrap();
     
     file.write_all("P3\n".as_bytes())?;

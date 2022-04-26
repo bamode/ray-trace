@@ -8,7 +8,7 @@ use crate::ray::Ray;
 
 use rand::prelude::*;
 
-pub const PI: f64 = 3.141592653589793285;
+pub const PI: f64 = 3.141_592_653_589_793;
 pub const DEG_TO_RAD: f64 = PI / 180.0;
 
 #[inline]
@@ -68,7 +68,7 @@ pub fn ray_color(ray: &Ray, world: &HitList<MatKind>, depth: isize, rng: &mut Th
 
     if world.hit(ray, 0.001, f64::INFINITY, &mut rec) {
         let mat = rec.material;
-        let scatter = mat.scatter(&ray, &mut rec, rng);
+        let scatter = mat.scatter(ray, &rec, rng);
         if scatter.is_scattered {
             return ray_color(&scatter.scattered, world, depth - 1, rng) * scatter.attenuation
         }
