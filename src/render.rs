@@ -2,18 +2,18 @@ use std::fs::File;
 use std::io::{Result, Write};
 
 use crate::hit::{Hit, HitList, HitRecord};
-use crate::material::{Material, MatKind};
-use crate::vec::Vec3;
+use crate::material::{MatKind, Material};
 use crate::ray::Ray;
+use crate::vec::Vec3;
 
 use rand::prelude::*;
 
-pub const PI: f64 = 3.141_592_653_589_793;
+pub const PI: f64 = std::f64::consts::PI;
 pub const DEG_TO_RAD: f64 = PI / 180.0;
 
 #[inline]
 pub fn degrees_to_radians(degrees: f64) -> f64 {
-    degrees *  DEG_TO_RAD
+    degrees * DEG_TO_RAD
 }
 
 #[inline]
@@ -23,8 +23,11 @@ pub fn random_f64(min: f64, max: f64, rng: &mut ThreadRng) -> f64 {
 
 #[inline]
 pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
-    if x < min { return min }
-    else if x > max { return max }
+    if x < min {
+        return min;
+    } else if x > max {
+        return max;
+    }
 
     x
 }
@@ -32,7 +35,11 @@ pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
 pub type Point = Vec3;
 
 impl Point {
-    pub const ORIGIN: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
+    pub const ORIGIN: Self = Self {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
 }
 
 pub type Color = Vec3;
@@ -61,22 +68,22 @@ pub fn write_buffer(file: &mut File, pixels: &[u8]) -> Result<()> {
 pub fn ray_color(ray: &Ray, world: &HitList<MatKind>, depth: isize, rng: &mut ThreadRng) -> Color {
     let mut rec = HitRecord::empty();
 
-    if depth <= 0 { 
+    if depth <= 0 {
         //println!("[WARNING] depth limit reached");
-        return Color::new(0.0, 0.0, 0.0) 
+        return Color::new(0.0, 0.0, 0.0);
     }
 
     if world.hit(ray, 0.001, f64::INFINITY, &mut rec) {
         let mat = rec.material;
         let scatter = mat.scatter(ray, &rec, rng);
         if scatter.is_scattered {
-            return ray_color(&scatter.scattered, world, depth - 1, rng) * scatter.attenuation
+            return ray_color(&scatter.scattered, world, depth - 1, rng) * scatter.attenuation;
         }
-        return Color::default()
+        return Color::default();
     }
 
     let unit_dir = ray.dir.unit_vector();
     let t = (unit_dir.y + 1.0) * 0.5;
-    
+
     Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
 }

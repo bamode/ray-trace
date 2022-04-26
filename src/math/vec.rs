@@ -1,31 +1,31 @@
 use std::fmt;
-use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use rand::prelude::*;
 
 use crate::render::random_f64;
 
 /// Ray tracers are concerned principally with calculating the geometry
-/// of vectors in a three-dimensional space. Thus, it makes since to 
-/// write a general purpose vector for R^3, and provide the usual 
+/// of vectors in a three-dimensional space. Thus, it makes since to
+/// write a general purpose vector for R^3, and provide the usual
 /// utility functions to do vector math.
-/// 
+///
 /// Ultimately, our vector is designed to provide a nice interface to what
 /// ought be as fast as a three-tuple of `f64`. In addition to vector
 /// math that is implemented on the `Vec3` struct itself, we also provide
-/// implementations of all the usual operators. 
-/// 
+/// implementations of all the usual operators.
+///
 /// ### Note
-/// 
-/// Something interesting in the book (p. 60) is this idea of being able to 
+///
+/// Something interesting in the book (p. 60) is this idea of being able to
 /// treat a Vec3 as a list with `[]` access. I'm going to try to avoid this
 /// because it won't lead to particularly idiomatic Rust. Instead, I'll be trying
 /// to rewrite algorithms locally to go around this.
-/// 
+///
 /// ### Note
-/// 
+///
 /// On the location of interoperation between these various 3-dimensional types:
-/// in general, I treat `Vec3` as a base, and so `Add` between a `Point3` and a 
+/// in general, I treat `Vec3` as a base, and so `Add` between a `Point3` and a
 /// `Vec3` is defined in `point.rs` and not `vec.rs`.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vec3 {
@@ -54,12 +54,14 @@ impl Vec3 {
         const S: f64 = 1.0e-8;
         self.x.abs() < S && self.y.abs() < S && self.z.abs() < S
     }
-    
+
     #[inline]
     pub fn cross(&self, other: &Self) -> Self {
-        Vec3::new(self.y * other.z - self.z * other.y,
-                  self.z * other.x - self.x * other.z,
-                  self.x * other.y - self.y * other.x)
+        Vec3::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
     }
 
     #[inline]
@@ -68,7 +70,7 @@ impl Vec3 {
     }
 
     #[inline]
-    pub fn unit_vector(&self) -> Self { 
+    pub fn unit_vector(&self) -> Self {
         *self / self.length()
     }
 
@@ -86,7 +88,7 @@ impl Vec3 {
         };
 
         let v3 = v1.cross(&v2);
-        
+
         (v1, v2, v3)
     }
 
@@ -105,13 +107,21 @@ impl Vec3 {
     #[allow(unused)]
     #[inline]
     pub fn min(&self, other: &Self) -> Self {
-        Self::new(self.x.min(other.x), self.y.min(other.y), self.z.min(other.z))
+        Self::new(
+            self.x.min(other.x),
+            self.y.min(other.y),
+            self.z.min(other.z),
+        )
     }
 
     #[allow(unused)]
     #[inline]
     pub fn max(&self, other: &Self) -> Self {
-        Self::new(self.x.max(other.x), self.y.max(other.y), self.z.max(other.z))
+        Self::new(
+            self.x.max(other.x),
+            self.y.max(other.y),
+            self.z.max(other.z),
+        )
     }
 
     /// Unimplemented because I want to avoid this sort of thing.
@@ -121,7 +131,7 @@ impl Vec3 {
         unimplemented!()
     }
 
-    /// Unimplemented because I don't quite understand what the idea is. I'm 
+    /// Unimplemented because I don't quite understand what the idea is. I'm
     /// concerned that it's very unsafe, so I want to see it in action before
     /// making it available as a tool.
     #[allow(unused)]
@@ -152,15 +162,19 @@ impl Vec3 {
     pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Self {
         loop {
             let p = Self::random(-1.0, 1.0, rng);
-            if p.length_squared() >= 1.0 { continue }
-            return p
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+            return p;
         }
     }
 
     pub fn random_in_unit_disk(rng: &mut ThreadRng) -> Self {
         loop {
             let p = Vec3::new(random_f64(-1.0, 1.0, rng), random_f64(-1.0, 1.0, rng), 0.0);
-            if p.length_squared() < 1.0 { return p }
+            if p.length_squared() < 1.0 {
+                return p;
+            }
         }
     }
 
@@ -168,7 +182,11 @@ impl Vec3 {
         Self::random_in_unit_sphere(rng).unit_vector()
     }
 
-    pub const X_HAT: Self = Self { x: 1.0, y: 0.0, z: 0.0 };
+    pub const X_HAT: Self = Self {
+        x: 1.0,
+        y: 0.0,
+        z: 0.0,
+    };
 }
 
 impl Neg for Vec3 {
@@ -181,7 +199,7 @@ impl Neg for Vec3 {
 impl Add for Vec3 {
     type Output = Self;
     fn add(self, other: Self) -> Self {
-        Vec3::new(self.x + other.x, self.y + other.y, self.z + other.z) 
+        Vec3::new(self.x + other.x, self.y + other.y, self.z + other.z)
     }
 }
 
@@ -196,7 +214,7 @@ impl AddAssign for Vec3 {
 impl Sub for Vec3 {
     type Output = Self;
     fn sub(self, other: Self) -> Self {
-        Vec3::new(self.x - other.x, self.y - other.y, self.z - other.z) 
+        Vec3::new(self.x - other.x, self.y - other.y, self.z - other.z)
     }
 }
 
@@ -248,7 +266,7 @@ impl DivAssign<f64> for Vec3 {
 impl fmt::Display for Vec3 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "[{} {} {}]", self.x, self.y, self.z)?;
-        
+
         Ok(())
     }
 }

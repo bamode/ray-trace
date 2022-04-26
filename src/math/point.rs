@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use super::vec::Vec3;
 
@@ -100,7 +100,7 @@ impl Add<Vec3> for Point3 {
     }
 }
 
-impl Add<Point3> for Vec3 { 
+impl Add<Point3> for Vec3 {
     type Output = Point3;
 
     fn add(self, other: Point3) -> Point3 {

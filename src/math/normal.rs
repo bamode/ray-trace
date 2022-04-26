@@ -1,12 +1,12 @@
 #![allow(unused)]
 
-use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use rand::prelude::*;
 
-use super::Dot;
-use super::vec::Vec3;
 use super::super::render::random_f64;
+use super::vec::Vec3;
+use super::Dot;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Normal {
@@ -19,7 +19,7 @@ impl Normal {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Normal { x, y, z }
     }
-    
+
     #[inline]
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
@@ -35,12 +35,14 @@ impl Normal {
         const S: f64 = 1.0e-8;
         self.x.abs() < S && self.y.abs() < S && self.z.abs() < S
     }
-    
+
     #[inline]
     pub fn cross(&self, other: &Self) -> Self {
-        Self::new(self.y * other.z - self.z * other.y,
-                  self.z * other.x - self.x * other.z,
-                  self.x * other.y - self.y * other.x)
+        Self::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
     }
 
     #[inline]
@@ -49,7 +51,7 @@ impl Normal {
     }
 
     #[inline]
-    pub fn unit_vector(&self) -> Self { 
+    pub fn unit_vector(&self) -> Self {
         *self / self.length()
     }
 
@@ -67,7 +69,7 @@ impl Normal {
         };
 
         let n3 = n1.cross(&n2);
-        
+
         (n1, n2, n3)
     }
 
@@ -86,13 +88,21 @@ impl Normal {
     #[allow(unused)]
     #[inline]
     pub fn min(&self, other: &Self) -> Self {
-        Self::new(self.x.min(other.x), self.y.min(other.y), self.z.min(other.z))
+        Self::new(
+            self.x.min(other.x),
+            self.y.min(other.y),
+            self.z.min(other.z),
+        )
     }
 
     #[allow(unused)]
     #[inline]
     pub fn max(&self, other: &Self) -> Self {
-        Self::new(self.x.max(other.x), self.y.max(other.y), self.z.max(other.z))
+        Self::new(
+            self.x.max(other.x),
+            self.y.max(other.y),
+            self.z.max(other.z),
+        )
     }
 
     /// Unimplemented because I want to avoid this sort of thing.
@@ -102,7 +112,7 @@ impl Normal {
         unimplemented!()
     }
 
-    /// Unimplemented because I don't quite understand what the idea is. I'm 
+    /// Unimplemented because I don't quite understand what the idea is. I'm
     /// concerned that it's very unsafe, so I want to see it in action before
     /// making it available as a tool.
     #[allow(unused)]
@@ -133,15 +143,19 @@ impl Normal {
     pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Self {
         loop {
             let p = Self::random(-1.0, 1.0, rng);
-            if p.length_squared() >= 1.0 { continue }
-            return p
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+            return p;
         }
     }
 
     pub fn random_in_unit_disk(rng: &mut ThreadRng) -> Self {
         loop {
             let p = Self::new(random_f64(-1.0, 1.0, rng), random_f64(-1.0, 1.0, rng), 0.0);
-            if p.length_squared() < 1.0 { return p }
+            if p.length_squared() < 1.0 {
+                return p;
+            }
         }
     }
 

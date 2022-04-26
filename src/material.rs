@@ -12,10 +12,7 @@ pub struct Scatter {
 }
 
 pub trait Material {
-    fn scatter(&self,
-               r_in: &Ray, 
-               hit_record: &HitRecord<MatKind>, 
-               rng: &mut ThreadRng) -> Scatter;
+    fn scatter(&self, r_in: &Ray, hit_record: &HitRecord<MatKind>, rng: &mut ThreadRng) -> Scatter;
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -30,20 +27,27 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, 
-               _r_in: &Ray, 
-               hit_record: &HitRecord<MatKind>, 
-               rng: &mut ThreadRng) -> Scatter 
-    {
+    fn scatter(
+        &self,
+        _r_in: &Ray,
+        hit_record: &HitRecord<MatKind>,
+        rng: &mut ThreadRng,
+    ) -> Scatter {
         let mut scatter_direction = hit_record.normal + Vec3::random_unit_vector(rng);
 
-        if scatter_direction.near_zero() { scatter_direction = hit_record.normal; }
-        
+        if scatter_direction.near_zero() {
+            scatter_direction = hit_record.normal;
+        }
+
         let scattered = Ray::new(hit_record.p, scatter_direction);
         let attenuation = self.albedo;
         let is_scattered = true;
-        
-        Scatter { is_scattered, attenuation, scattered }
+
+        Scatter {
+            is_scattered,
+            attenuation,
+            scattered,
+        }
     }
 }
 
@@ -59,17 +63,22 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, 
-               r_in: &Ray, 
-               hit_record: &HitRecord<MatKind>, 
-               _rng: &mut ThreadRng) -> Scatter
-    {
+    fn scatter(
+        &self,
+        r_in: &Ray,
+        hit_record: &HitRecord<MatKind>,
+        _rng: &mut ThreadRng,
+    ) -> Scatter {
         let reflected = r_in.dir.unit_vector().reflect(hit_record.normal);
         let scattered = Ray::new(hit_record.p, reflected);
         let attenuation = self.albedo;
         let is_scattered = scattered.dir.dot(&hit_record.normal) > 0.0;
-        
-        Scatter { is_scattered, attenuation, scattered }
+
+        Scatter {
+            is_scattered,
+            attenuation,
+            scattered,
+        }
     }
 }
 
@@ -91,28 +100,35 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self,
-               r_in: &Ray,
-               hit_record: &HitRecord<MatKind>,
-               rng: &mut ThreadRng) -> Scatter
-    {
+    fn scatter(&self, r_in: &Ray, hit_record: &HitRecord<MatKind>, rng: &mut ThreadRng) -> Scatter {
         let attenuation = Color::new(0.98, 0.98, 0.98);
-        let refraction_ratio = 
-            if hit_record.front_face.unwrap() { 1.0 / self.ir }
-            else { self.ir };
+        let refraction_ratio = if hit_record.front_face.unwrap() {
+            1.0 / self.ir
+        } else {
+            self.ir
+        };
 
         let unit_dir = r_in.dir.unit_vector();
         let cos_theta: f64 = -unit_dir.dot(&hit_record.normal).min(1.0);
         let sin_theta: f64 = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
-        let dir = if cannot_refract || Dielectric::reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>() { unit_dir.reflect(hit_record.normal) }
-            else { unit_dir.refract(hit_record.normal, refraction_ratio) };
+        let dir = if cannot_refract
+            || Dielectric::reflectance(cos_theta, refraction_ratio) > rng.gen::<f64>()
+        {
+            unit_dir.reflect(hit_record.normal)
+        } else {
+            unit_dir.refract(hit_record.normal, refraction_ratio)
+        };
 
         let scattered = Ray::new(hit_record.p, dir);
         let is_scattered = true;
 
-        Scatter { is_scattered, attenuation, scattered }
+        Scatter {
+            is_scattered,
+            attenuation,
+            scattered,
+        }
     }
 }
 
@@ -124,11 +140,7 @@ pub enum MatKind {
 }
 
 impl Material for MatKind {
-    fn scatter(&self, 
-               r_in: &Ray, 
-               hit_record: &HitRecord<MatKind>, 
-               rng: &mut ThreadRng) -> Scatter
-    {
+    fn scatter(&self, r_in: &Ray, hit_record: &HitRecord<MatKind>, rng: &mut ThreadRng) -> Scatter {
         match self {
             Self::Lambertian(l) => l.scatter(r_in, hit_record, rng),
             Self::Metal(m) => m.scatter(r_in, hit_record, rng),

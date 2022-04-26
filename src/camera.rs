@@ -18,15 +18,14 @@ pub struct Camera {
 
 impl Camera {
     pub fn new(
-        aspect_ratio: f64, 
-        vfov: f64, 
-        lookfrom: Point, 
-        lookat: Point, 
-        vup: Vec3, 
-        aperture: f64, 
-        focus_dist: f64) -> Self 
-    {
-        
+        aspect_ratio: f64,
+        vfov: f64,
+        lookfrom: Point,
+        lookat: Point,
+        vup: Vec3,
+        aperture: f64,
+        focus_dist: f64,
+    ) -> Self {
         let theta = degrees_to_radians(vfov);
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h;
@@ -45,7 +44,7 @@ impl Camera {
 
         let rng = thread_rng();
 
-        Camera { 
+        Camera {
             origin,
             horizontal,
             vertical,
@@ -62,6 +61,7 @@ impl Camera {
         let offset = self.u * rd.x + self.v * rd.y;
         Ray::new(
             self.origin + offset,
-            self.ll_corner + self.horizontal * s + self.vertical * t - self.origin - offset)
+            self.ll_corner + self.horizontal * s + self.vertical * t - self.origin - offset,
+        )
     }
 }

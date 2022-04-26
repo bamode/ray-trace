@@ -4,18 +4,18 @@ use std::io::{Result, Write};
 mod camera;
 mod hit;
 mod material;
+mod math;
 mod ray;
 mod render;
 mod sphere;
-mod math;
 
 use crate::camera::Camera;
 use crate::hit::{HitList, Hittable};
-use crate::material::{Dielectric, Lambertian, Metal, MatKind};
-use crate::render::{Color, Point, ray_color};
-use crate::sphere::Sphere;
-use crate::math::*;
+use crate::material::{Dielectric, Lambertian, MatKind, Metal};
 use crate::math::vec::Vec3;
+use crate::math::*;
+use crate::render::{ray_color, Color, Point};
+use crate::sphere::Sphere;
 
 use clap::Parser;
 use indicatif::ParallelProgressIterator;
@@ -23,11 +23,13 @@ use rand::prelude::*;
 use rayon::prelude::*;
 
 #[derive(Parser)]
-#[clap(name = "ray-trace",
-       author = "Brent Mode <bmode@wisc.edu>",
-       version,
-       about = "Parallelized MC ray tracing renderer written in Rust",
-       long_about = "For now, this is a demo that only creates one semi-random scene")]
+#[clap(
+    name = "ray-trace",
+    author = "Brent Mode <bmode@wisc.edu>",
+    version,
+    about = "Parallelized MC ray tracing renderer written in Rust",
+    long_about = "For now, this is a demo that only creates one semi-random scene"
+)]
 struct Cli {
     #[clap(short, long)]
     out: Option<String>,
@@ -41,7 +43,7 @@ struct Cli {
     depth: Option<isize>,
 }
 
-/// This project is in following with Peter Shirley's excellent Ray Tracing in a Weekend book. 
+/// This project is in following with Peter Shirley's excellent Ray Tracing in a Weekend book.
 fn main() -> Result<()> {
     // CLI
     let cli = Cli::parse();
@@ -68,7 +70,7 @@ fn main() -> Result<()> {
 
     // Camera
     // TODO: It would be neat to be able to specify these in someway to describe a series
-    // of different scenes. I think this is beyond a tasteful CLI though, so it'll have 
+    // of different scenes. I think this is beyond a tasteful CLI though, so it'll have
     // to wait on me writing a TOML or JSON scene descripter with serde.
     const VFOV: f64 = 20.0;
     let lookfrom = Point::new(13.0, 2.0, 3.0);
@@ -77,11 +79,10 @@ fn main() -> Result<()> {
     let dist_to_focus = 10.0;
     let aperture = 0.1;
 
-
-    // Render 
+    // Render
     let filename = cli.out.unwrap_or_else(|| "image.ppm".to_string());
     let mut file = File::create(filename).unwrap();
-    
+
     file.write_all("P3\n".as_bytes())?;
     file.write_all(format!("{} {}\n", width, height).as_bytes())?;
     file.write_all("255\n".as_bytes())?;
@@ -90,24 +91,35 @@ fn main() -> Result<()> {
     let mut pixels = vec![0; width * height * 3];
 
     let bands: Vec<(usize, &mut [u8])> = pixels.chunks_mut(width * 3).enumerate().collect();
-    bands.into_par_iter().progress_count(height as u64).for_each(|(j, band)| {
-        let mut rng = rand::thread_rng();
-        // Only needs to be mutable for the RNG to work.
-        let mut camera = Camera::new(aspect_ratio, VFOV, lookfrom, lookat, vup, aperture, dist_to_focus); 
-        for i in (0..width).rev() {
-            let mut pixel_color = Color::new(0.0, 0.0, 0.0);
-            for _s in 0..samples {
-                let u = (i as f64 + rng.gen::<f64>()) / (width as f64 - 1.0);
-                let v = (j as f64 + rng.gen::<f64>()) / (height as f64 - 1.0);
-                let ray = camera.get_ray(u, v);
-                pixel_color += ray_color(&ray, &world, depth, &mut rng);
+    bands
+        .into_par_iter()
+        .progress_count(height as u64)
+        .for_each(|(j, band)| {
+            let mut rng = rand::thread_rng();
+            // Only needs to be mutable for the RNG to work.
+            let mut camera = Camera::new(
+                aspect_ratio,
+                VFOV,
+                lookfrom,
+                lookat,
+                vup,
+                aperture,
+                dist_to_focus,
+            );
+            for i in (0..width).rev() {
+                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                for _s in 0..samples {
+                    let u = (i as f64 + rng.gen::<f64>()) / (width as f64 - 1.0);
+                    let v = (j as f64 + rng.gen::<f64>()) / (height as f64 - 1.0);
+                    let ray = camera.get_ray(u, v);
+                    pixel_color += ray_color(&ray, &world, depth, &mut rng);
+                }
+                let pix_result = render::write_color_to_pixel_buffer(pixel_color, samples);
+                band[i * 3] = pix_result.0;
+                band[i * 3 + 1] = pix_result.1;
+                band[i * 3 + 2] = pix_result.2;
             }
-            let pix_result = render::write_color_to_pixel_buffer(pixel_color, samples);
-            band[i * 3] = pix_result.0;
-            band[i * 3 + 1] = pix_result.1;
-            band[i * 3 + 2] = pix_result.2;
-        }
-    });
+        });
 
     render::write_buffer(&mut file, &pixels)?;
 
@@ -118,14 +130,22 @@ fn main() -> Result<()> {
 /// We make several different small spheres, somewhat randomly positioning them and assigning them a material.
 fn random_scene(rng: &mut ThreadRng) -> HitList<MatKind> {
     let mut world: HitList<MatKind> = HitList::new();
-    
+
     let ground = MatKind::Lambertian(Lambertian::new(Color::new(0.5117, 0.2539, 0.0977)));
-    world.push(Hittable::Sphere(Sphere::new(Point::new(0.0, -1000.0, 0.0), 1000.0, ground)));
+    world.push(Hittable::Sphere(Sphere::new(
+        Point::new(0.0, -1000.0, 0.0),
+        1000.0,
+        ground,
+    )));
 
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat = rng.gen::<f64>();
-            let center = Point::new(a as f64 + 0.9 * rng.gen::<f64>(), 0.2, b as f64 + 0.9 * rng.gen::<f64>());
+            let center = Point::new(
+                a as f64 + 0.9 * rng.gen::<f64>(),
+                0.2,
+                b as f64 + 0.9 * rng.gen::<f64>(),
+            );
 
             if (center - Point::new(4.0, 0.2, 0.0)).length() > 0.9 {
                 let sphere_mat: MatKind;
@@ -149,13 +169,25 @@ fn random_scene(rng: &mut ThreadRng) -> HitList<MatKind> {
     }
 
     let mat1 = MatKind::Dielectric(Dielectric::new(1.5));
-    world.push(Hittable::Sphere(Sphere::new(Point::new(0.0, 1.0, 0.0), 1.0, mat1)));
+    world.push(Hittable::Sphere(Sphere::new(
+        Point::new(0.0, 1.0, 0.0),
+        1.0,
+        mat1,
+    )));
 
     let mat2 = MatKind::Lambertian(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
-    world.push(Hittable::Sphere(Sphere::new(Point::new(-4.0, 1.0, 0.0), 1.0, mat2)));
+    world.push(Hittable::Sphere(Sphere::new(
+        Point::new(-4.0, 1.0, 0.0),
+        1.0,
+        mat2,
+    )));
 
     let mat3 = MatKind::Metal(Metal::new(Color::new(0.7, 0.6, 0.5)));
-    world.push(Hittable::Sphere(Sphere::new(Point::new(4.0, 1.0, 0.0), 1.0, mat3)));
+    world.push(Hittable::Sphere(Sphere::new(
+        Point::new(4.0, 1.0, 0.0),
+        1.0,
+        mat3,
+    )));
 
     world
 }

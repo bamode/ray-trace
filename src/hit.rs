@@ -5,7 +5,7 @@ use crate::sphere::Sphere;
 use crate::vec::Vec3;
 
 #[derive(Clone, Copy, Debug)]
-pub struct HitRecord<Mat> 
+pub struct HitRecord<Mat>
 where
     Mat: Material + Copy + Default,
 {
@@ -21,7 +21,13 @@ where
     Mat: Material + Copy + Default,
 {
     pub fn new(p: Point, normal: Vec3, t: f64, material: Mat, front_face: Option<bool>) -> Self {
-        HitRecord { p, normal, t, material, front_face }
+        HitRecord {
+            p,
+            normal,
+            t,
+            material,
+            front_face,
+        }
     }
 
     pub fn empty() -> Self {
@@ -30,50 +36,54 @@ where
 
     pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
         self.front_face = Some(ray.dir.dot(outward_normal) < 0.0);
-        match self.front_face { 
-            Some(true) => { self.normal = *outward_normal; } 
-            Some(false) => { self.normal = -(*outward_normal); }
-            None => panic!("Impossible to reach error")
+        match self.front_face {
+            Some(true) => {
+                self.normal = *outward_normal;
+            }
+            Some(false) => {
+                self.normal = -(*outward_normal);
+            }
+            None => panic!("Impossible to reach error"),
         }
     }
 }
 
 pub trait Hit<Mat>
 where
-    Mat: Material + Copy + Default
+    Mat: Material + Copy + Default,
 {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord<Mat>) -> bool;
 }
 
 #[derive(Clone, Copy, Debug)]
-pub enum Hittable<Mat> 
+pub enum Hittable<Mat>
 where
-    Mat: Material + Copy + Default
+    Mat: Material + Copy + Default,
 {
     Sphere(Sphere<Mat>),
 }
 
-impl<Mat> Hit<Mat> for Hittable<Mat> 
+impl<Mat> Hit<Mat> for Hittable<Mat>
 where
-    Mat: Material + Copy + Default
+    Mat: Material + Copy + Default,
 {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord<Mat>) -> bool {
         match self {
-            Self::Sphere(s) => s.hit(ray, t_min, t_max, rec)
+            Self::Sphere(s) => s.hit(ray, t_min, t_max, rec),
         }
     }
 }
 
 pub struct HitList<Mat>
 where
-    Mat: Material + Copy + Default
+    Mat: Material + Copy + Default,
 {
     inner: Vec<Hittable<Mat>>,
 }
 
 impl<Mat> HitList<Mat>
 where
-    Mat: Material + Copy + Default
+    Mat: Material + Copy + Default,
 {
     pub fn new() -> Self {
         HitList { inner: Vec::new() }
@@ -84,9 +94,9 @@ where
     }
 }
 
-impl<Mat> Hit<Mat> for HitList<Mat> 
+impl<Mat> Hit<Mat> for HitList<Mat>
 where
-    Mat: Material + Copy + Default
+    Mat: Material + Copy + Default,
 {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord<Mat>) -> bool {
         let mut temp_rec: HitRecord<Mat> = HitRecord::empty();
@@ -102,7 +112,6 @@ where
                 rec.t = temp_rec.t;
                 rec.material = temp_rec.material;
                 rec.front_face = temp_rec.front_face;
-                //*rec = temp_rec;
             }
         }
 
