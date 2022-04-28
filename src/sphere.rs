@@ -1,8 +1,8 @@
 use crate::hit::{Hit, HitRecord};
 use crate::material::Material;
 use crate::math::ray::Ray;
-use crate::render::Point;
 use crate::math::vec::Vec3;
+use crate::render::Point;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Sphere<Mat>

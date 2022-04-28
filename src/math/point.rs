@@ -187,3 +187,19 @@ impl MulAssign<f64> for Point3 {
         self.z *= rhs;
     }
 }
+
+impl Div<f64> for Point3 {
+    type Output = Point3;
+
+    fn div(self, rhs: f64) -> Point3 {
+        Point3::new(self.x * rhs, self.y * rhs, self.z * rhs)
+    }
+}
+
+impl DivAssign<f64> for Point3 {
+    fn div_assign(&mut self, rhs: f64) {
+        self.x /= rhs;
+        self.y /= rhs;
+        self.z /= rhs;
+    }
+}
